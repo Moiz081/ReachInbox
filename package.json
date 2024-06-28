@@ -1,0 +1,27 @@
+{
+  "name": "riassessment",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "npx nodemon src/index",
+    "server": "npx nodemon src/services/scheduler-service.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@azure/msal-node": "^2.9.2",
+    "axios": "^1.7.2",
+    "body-parser": "^1.20.2",
+    "bullmq": "^5.8.2",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "google-auth-library": "^9.11.0",
+    "googleapis": "^140.0.1",
+    "ioredis": "^5.4.1",
+    "nodemon": "^3.1.4",
+    "openai": "^4.52.1"
+  }
+}
