@@ -60,6 +60,7 @@ const initializeWorkers = async () => {
                 let subject = reply[0].replace("Subject: ", "");
                 let content = reply[1].replace(": ", "");
                 let recipient = job.data.sender;
+                console.log("hehe",recipient)
 
                 let message = {
                     "message": {

@@ -10,6 +10,7 @@ module.exports = {
     AZURE_CLIENT_SECRET: process.env.AZURE_CLIENT_SECRET,
     OPENAI_APIKEY: process.env.OPENAI_APIKEY,
     REDIS_HOST: process.env.REDIS_HOST,
-    REDIS_PORT: process.env.REDIS_PORT
-
+    REDIS_PORT: process.env.REDIS_PORT,
+    GMAIL_USER: process.env.GMAIL_USER,
+    OUTLOOK_USER: process.env.OUTLOOK_USER
 };

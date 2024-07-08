@@ -2,9 +2,9 @@ const axios = require('axios');
 const redisConnection = require('../config/db');
 const { Queue, Worker } = require("bullmq")
 const { readMailAndAssignLabel, readLabelAndReply } = require("../services/openai-service");
-
+const cron = require('node-cron');
 const LabelQueue = new Queue("reply", redisConnection);
-
+const { GMAIL_USER } = require('../config/serverConfig');
 
 const userInfo = async (req, res) => {
     try {
@@ -53,15 +53,20 @@ const createLabel = async (req, res) => {
 
 const list = async (req, res) => {
     try {
-        let { userId } = req.params
+        let userId = GMAIL_USER;
         let access_token = await redisConnection.get(userId)
 
-        let response = await axios.get(`https://gmail.googleapis.com/gmail/v1/users/${userId}/messages`, {
+        let response = await axios.get(`https://gmail.googleapis.com/gmail/v1/users/${userId}/messages?maxResults=5`, {
             headers: {
                 "Content-Type": "application/json",
                 "Authorization": `Bearer ${access_token}`
             }
         })
+
+        console.log("This is response: ",response.data);
+        const id = response.data.messages[0].id;
+        const setIdInRedis = await redisConnection.set("messageId",id);
+        console.log("Set Id in redis:", setIdInRedis);
 
         res.status(200).json(response.data)
     } catch (error) { 
@@ -73,12 +78,11 @@ const list = async (req, res) => {
     }
 }
 
-const read = async (req, res) => {
-    try {
-        let { userId, id } = req.params
-
-        let access_token = await redisConnection.get(userId)
-
+const read = async (userId, id, req, res) => {
+    try { 
+        console.log("Email of read", userId, "MessageId:", id);
+        let access_token = await redisConnection.get(userId);
+        console.log("This is read access token: ", access_token);
         let response = await axios.get(`https://gmail.googleapis.com/gmail/v1/users/${userId}/messages/${id}`, {
             headers: {
                 "Content-Type": "application/json",
@@ -204,6 +208,56 @@ async function assignLabel(label, userId, id, access_token) {
         return false;
     }
 }
+
+cron.schedule("* * * * *", async () => {
+    try {
+      console.log("calling LISTEMAIL==============================");
+      const req = {
+        params: { email: GMAIL_USER },
+      };
+      const res = {
+        status: (code) => ({
+          json: (data) => console.log(`Status: ${code}, Data: ${JSON.stringify(data)}`)
+        })
+      };
+      await list(req, res);
+    } catch (error) {
+      console.error("Error calling LISTEMAIL:");
+      console.log(error.response ? error.response.data : error.message);
+    }
+  });
+  
+  
+  cron.schedule("*/2 * * * *", async () => {
+    try {
+        console.log("calling READEMAIL=================================");
+        const id = await redisConnection.get('id');
+    
+        console.log("Id", id);
+
+        const requestParams = {
+            email: GMAIL_USER,
+            messageId: id
+        };
+
+        const mockRes = {
+            status: (code) => ({
+                json: (data) => console.log(`Status: ${code}, Data: ${JSON.stringify(data)}`)
+            })
+        };
+
+        await read(
+            requestParams.email,
+            requestParams.messageId,
+            {},
+            mockRes
+        );
+        console.log("ReadMails===========================", requestParams);
+    } catch (error) {
+        console.error("Error calling READEMAIL:");
+        console.log(error.response ? error.response.data : error.message);
+    }
+});
 
 
 module.exports = {
