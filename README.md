@@ -60,6 +60,5 @@ http://localhost:{PORT}/api/v1/{API_ENDPOINT}
 ```
 
 ### Video Walkthrough
-```
-https://drive.google.com/file/d/1DTYZOzBpyo5tPWBoQ-8zBFvozV_I6ryS/view?usp=drivesdk
-```
+
+https://drive.google.com/file/d/1EcNE2nbSzoJLHRQpLveKm4BAza6gsRnm/view?usp=drivesdk
